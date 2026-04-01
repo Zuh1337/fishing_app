@@ -33,26 +33,48 @@ export default function App() {
   const [weather, setWeather] = useState<WeatherSnapshot | null>(null);
 
   useEffect(() => {
+    let isMounted = true;
+
     (async () => {
       const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
+      if (!isMounted || status !== 'granted') {
         return;
       }
 
       const current = await Location.getCurrentPositionAsync({});
+      if (!isMounted) {
+        return;
+      }
+
       setRegion((prev) => ({
         ...prev,
         latitude: current.coords.latitude,
         longitude: current.coords.longitude,
       }));
     })();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   useEffect(() => {
     const target = pin ?? { lat: region.latitude, lng: region.longitude };
-    getWeatherSnapshot(target.lat, target.lng)
+    const controller = new AbortController();
+
+    getWeatherSnapshot(target.lat, target.lng, controller.signal)
       .then(setWeather)
-      .catch(() => setWeather(null));
+      .catch((error: unknown) => {
+        if (error instanceof Error && error.name === 'AbortError') {
+          return;
+        }
+
+        setWeather(null);
+      });
+
+    return () => {
+      controller.abort();
+    };
   }, [region.latitude, region.longitude, pin]);
 
   const onMapPress = (event: MapPressEvent) => {
