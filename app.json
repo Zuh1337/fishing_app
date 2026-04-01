@@ -1,0 +1,22 @@
+{
+  "expo": {
+    "name": "Fishing Conditions",
+    "slug": "fishing-conditions",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Allow Fishing Conditions to access your location for map pins and fishing reports."
+        }
+      ]
+    ],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "permissions": ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION"]
+    }
+  }
+}
